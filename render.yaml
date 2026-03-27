@@ -1,0 +1,28 @@
+services:
+  # Backend Web Service
+  - type: web
+    name: it-asset-backend
+    env: docker
+    dockerContext: ./backend
+    dockerfile: Dockerfile
+    plan: free # or starter
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false # Set in Render Dashboard
+      - key: JWT_SECRET
+        generateValue: true
+      - key: PORT
+        value: 5000
+
+  # Frontend Web Service
+  - type: web
+    name: it-asset-frontend
+    env: docker
+    dockerContext: ./frontend
+    dockerfile: Dockerfile
+    plan: free
+    envVars:
+      - key: VITE_API_URL
+        value: https://it-asset-backend.onrender.com/api

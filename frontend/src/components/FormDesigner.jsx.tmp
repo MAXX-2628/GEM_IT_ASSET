@@ -1,0 +1,487 @@
+                        <X size={20} />
+                    </Button>
+                    
+                    <Button variant="primary" onClick={() => onSave(fields.map(f => { const { _keyManual, ...rest } = f; return rest; }))} icon={Save} className="h-12 px-10 shadow-xl shadow-orange-500/20 font-black text-[10px] tracking-widest uppercase">
+                        Finalize Architecture
+                    </Button>
+                </div>
+            </div>
+
+            <div>
+                {/* ── Left Palette ── */}
+                {!preview && (
+                    <div>
+                        <div>
+                            <div>Add Form Fields</div>
+                            <div>Click to add at bottom</div>
+                        </div>
+                        <div>
+                            {/* Standard Fields */}
+                            {[
+                                { type: 'text', label: 'Single Line Text', sub: 'Input, ID, Name', icon: Type },
+                                { type: 'number', label: 'Number Input', sub: 'Quantity, Price, Count', icon: Hash },
+                                { type: 'date', label: 'Date Picker', sub: 'Deadlines, Purchase, Expiry', icon: Calendar },
+                                { type: 'select', label: 'Dropdown List', sub: 'Single choice options', icon: List },
+                                { type: 'textarea', label: 'Multi-line Text', sub: 'Notes, Description, Logs', icon: AlignLeft },
+                            ].map(item => (
+                                <button
+                                    key={item.type}
+                                    onClick={() => addField(item.type, item.label)}
+                                >
+                                    <div>
+                                        <item.icon size={16} />
+                                    </div>
+                                    <div>
+                                        <div>{item.label}</div>
+                                        <div>{item.sub}</div>
+                                    </div>
+                                    <Plus size={14} />
+                                </button>
+                            ))}
+
+                            <div>Layout Helpers</div>
+                            <button
+                                onClick={() => addField('section', 'New Section')}
+                            >
+                                <div>
+                                    <SeparatorHorizontal size={16} />
+                                </div>
+                                <div>
+                                    <div>Section Divider</div>
+                                    <div>Group related fields</div>
+                                </div>
+                                <Plus size={14} />
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* ── Canvas ── */}
+                <div>
+                    {preview ? (
+                        <PreviewForm fields={fields} />
+                    ) : (
+                        <div>
+                            <div>
+                                <div>
+                                    <GripVertical size={14} />
+                                    <p>
+                                        Drag to arrange · 12-column responsive grid
+                                    </p>
+                                </div>
+                                <div>
+                                    <div>
+                                        <div /> Selected
+                                    </div>
+                                    <div>
+                                        <div /> Snap Guide
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Grid canvas */}
+                            <div
+                                ref={canvasRef}
+                                onClick={() => setSelected(null)}
+                            >
+                                {/* Grid guide lines */}
+                                <div>
+                                    {Array.from({ length: COLS }).map((_, i) => (
+                                        <div key={i} />
+                                    ))}
+                                </div>
+
+                                {/* Drag Ghost Indicator */}
+                                {dragGhost && (
+                                    <div />
+                                )}
+
+                                {fields.map((f, idx) => {
+                                    const isSelected = selected === idx
+                                    const Icon = FIELD_TYPE_ICONS[f.field_type] || Type
+                                    const isSection = f.field_type === 'section'
+
+                                    return (
+                                        <div
+                                            key={f.key}
+                                            onClick={e => { e.stopPropagation(); setSelected(idx) }}
+                                            onMouseDown={e => onDragStart(e, idx)}
+                                        >
+                                            {isSection ? (
+                                                <div>
+                                                    <SeparatorHorizontal size={14} />
+                                                    <span>
+                                                        {f.label || 'New Section'}
+                                                    </span>
+                                                    {isSelected && (
+                                                        <button
+                                                            onMouseDown={e => e.stopPropagation()}
+                                                            onClick={e => { e.stopPropagation(); deleteField(idx) }}
+                                                        >
+                                                            <Trash2 size={12} />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    {/* Field header */}
+                                                    <div>
+                                                        <Icon size={13} />
+                                                        <span>
+                                                            {f.label || 'Untitled'}{f.required && <span>*</span>}
+                                                        </span>
+                                                        <span>{f.field_type}</span>
+                                                        {f.locked ? (
+                                                            <div title="System field - locked">
+                                                                <Lock size={11} />
+                                                            </div>
+                                                        ) : isSelected && (
+                                                            <button
+                                                                onMouseDown={e => e.stopPropagation()}
+                                                                onClick={e => { e.stopPropagation(); deleteField(idx) }}
+                                                            >
+                                                                <Trash2 size={12} />
+                                                            </button>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Mock input */}
+                                                    <div>
+                                                        {f.field_type === 'textarea' ? (
+                                                            <div>
+                                                                {f.placeholder || 'Text area...'}
+                                                            </div>
+                                                        ) : f.field_type === 'select' ? (
+                                                            <div>
+                                                                <span>{f.placeholder || 'Select...'}</span>
+                                                                <ChevronDown size={11} />
+                                                            </div>
+                                                        ) : (
+                                                            <div>
+                                                                {f.placeholder || (f.field_type === 'date' ? 'dd-mm-yyyy' : 'Enter value...')}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </>
+                                            )}
+
+                                            {/* Resize handle */}
+                                            {!f.locked && (
+                                                <div
+                                                    onMouseDown={e => onResizeStart(e, idx)}
+                                                >
+                                                    <svg width="10" height="10" viewBox="0 0 10 10" fill="var(--primary)">
+                                                        <path d="M2 8L8 2M5 8L8 5M8 8L8 8" stroke="var(--primary)" strokeWidth="1.5" strokeLinecap="round" />
+                                                    </svg>
+                                                </div>
+                                            )}
+
+                                            {/* Position badge */}
+                                            {isSelected && (
+                                                <div>
+                                                    {isSection ? 'Full Width Section' : `Cols ${f.x + 1}–${f.x + f.w} · Row ${f.y + 1}`}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )
+                                })}
+                            </div>
+
+                            {fields.length === 0 && (
+                                <div>
+                                    <div>Canvas is empty — use the left palette to add fields</div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+
+                {/* ── Properties Panel ── */}
+                {!preview && (
+                    <div>
+                        <div>
+                            <div>
+                                <Info size={16} />
+                            </div>
+                            <div>
+                                <div>Field Properties</div>
+                                {sel && <div>{sel.field_type} field</div>}
+                            </div>
+                        </div>
+
+                        {sel ? (
+                            <div>
+                                {sel.locked && (
+                                    <div>
+                                        <Lock size={14} />
+                                        <div>System Field · Core Logic Locked</div>
+                                    </div>
+                                )}
+
+                                {/* Label */}
+                                <div>
+                                    <label>Label *</label>
+                                    <input value={sel.label} onChange={e => updateField(selected, 'label', e.target.value)} />
+                                </div>
+
+                                {/* Key (Hide for sections) */}
+                                {sel.field_type !== 'section' && (
+                                    <div>
+                                        <label>Data Key (Unique Identifier)</label>
+                                        <input value={sel.key} onChange={e => updateField(selected, 'key', e.target.value)} disabled={sel.isSystem} />
+                                        <div>
+                                            {sel.isSystem ? 'System restricted' : 'Used in reports & excel exports'}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Type (Hide for sections) */}
+                                {sel.field_type !== 'section' && (
+                                    <div>
+                                        <label>Field Type</label>
+                                        <select value={sel.field_type} onChange={e => updateField(selected, 'field_type', e.target.value)} disabled={sel.isSystem}>
+                                            <option value="text">📝 Text</option>
+                                            <option value="number">🔢 Number</option>
+                                            <option value="date">📅 Date</option>
+                                            <option value="select">📋 Select Dropdown</option>
+                                            <option value="textarea">📄 Textarea</option>
+                                        </select>
+                                    </div>
+                                )}
+
+                                {/* Help Text */}
+                                {sel.field_type !== 'section' && (
+                                    <div>
+                                        <label>
+                                            Help Text <HelpCircle size={10} />
+                                        </label>
+                                        <input placeholder="e.g. Enter the 12-digit serial number" value={sel.help_text || ''} onChange={e => updateField(selected, 'help_text', e.target.value)} />
+                                        <div>Shows as a small hint below the field</div>
+                                    </div>
+                                )}
+
+                                {/* Data Source (select only) */}
+                                {sel.field_type === 'select' && (
+                                    <div>
+                                        <label>Data Source</label>
+                                        <select value={sel.data_source || 'static'} onChange={e => updateField(selected, 'data_source', e.target.value)} disabled={sel.isSystem}>
+                                            <option value="static">Manual Options</option>
+                                            <option value="departments">Departments List</option>
+                                            <option value="asset_types">Asset Types List</option>
+                                            <option value="assets">Assets of specific type</option>
+                                        </select>
+                                    </div>
+                                )}
+
+                                {/* Placeholder */}
+                                {['text', 'number', 'select', 'textarea'].includes(sel.field_type) && (
+                                    <div>
+                                        <label>Placeholder</label>
+                                        <input value={sel.placeholder || ''} onChange={e => updateField(selected, 'placeholder', e.target.value)} />
+                                    </div>
+                                )}
+
+                                {/* Options (select only, static only) */}
+                                {sel.field_type === 'select' && (sel.data_source === 'static' || !sel.data_source) && (
+                                    <div>
+                                        <label>Options (comma-separated)</label>
+                                        <textarea
+                                            rows={3}
+                                            placeholder="Active, Offline, Faulty"
+                                            value={sel.options?.join(', ') || ''}
+                                            onChange={e => updateField(selected, 'options', e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
+                                        />
+                                    </div>
+                                )}
+
+                                {/* Validation Section */}
+                                {sel.field_type !== 'section' && (
+                                    <div>
+                                        <div>Validation</div>
+                                        <Checkbox 
+                                            label="Mandatory"
+                                            checked={sel.required} 
+                                            onChange={e => updateField(selected, 'required', e.target.checked)} 
+                                            disabled={sel.locked} 
+                                        />
+                                        <p className="text-[7px] font-black text-slate-700 uppercase tracking-widest mt-1 ml-8">User must fill this field</p>
+                                    </div>
+                                )}
+
+                                <div>
+                                    <div>Grid Positioning</div>
+                                    <div>
+                                        {[
+                                            { label: 'Column Index', prop: 'x', min: 0, max: COLS - 1, disabled: false },
+                                            { label: 'Row Index', prop: 'y', min: 0, max: 999, disabled: false },
+                                            { label: 'Column Span', prop: 'w', min: 1, max: COLS, disabled: sel.field_type === 'section' },
+                                            { label: 'Row Span', prop: 'h', min: 1, max: 10, disabled: false },
+                                        ].map(item => (
+                                            <div key={item.prop}>
+                                                <label>{item.label}</label>
+                                                <input
+                                                    type="number" min={item.min} max={item.max}
+                                                    value={sel[item.prop]}
+                                                    disabled={item.disabled}
+                                                    onChange={e => updateField(selected, item.prop, Math.max(item.min, Math.min(item.max, Number(e.target.value))))}
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <button
+                                        onClick={() => deleteField(selected)}
+                                        disabled={sel.locked}
+                                    >
+                                        <Trash2 size={13} /> {sel.locked ? 'System Protected' : 'Delete Field'}
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <div>
+                                <LayoutGrid size={48} />
+                                <p>Click any element on the canvas to edit its properties</p>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* ── Templates Sidebar ── */}
+                {showTemplates && (
+                    <div>
+                        <div>
+                            <div>Saved Templates</div>
+                            <button onClick={() => setShowTemplates(false)}><X size={14} /></button>
+                        </div>
+
+                        <div>
+                            <div>
+                                <label>Save Current As Template</label>
+                                <div>
+                                    <input
+                                        placeholder="Template name..."
+                                        value={templateName}
+                                        onChange={e => setTemplateName(e.target.value)}
+                                    />
+                                    <button onClick={saveTemplate} disabled={loading}>
+                                        Save
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div>Select to Load</div>
+                                {templates.length === 0 ? (
+                                    <div>
+                                        No templates saved yet
+                                    </div>
+                                ) : (
+                                    <div>
+                                        {templates.map(t => (
+                                            <div
+                                                key={t._id}
+                                                onMouseEnter={() => setHoveredTemplate(t)}
+                                                onMouseLeave={() => setHoveredTemplate(null)}
+                                                onClick={() => {
+                                                    if (confirm('Replace current layout with this template?')) {
+                                                        setFields(t.fields)
+                                                        setShowTemplates(false)
+                                                    }
+                                                }}
+                                            >
+                                                <div>{t.name}</div>
+                                                <div>{t.fields.length} fields</div>
+                                                <button
+                                                    onClick={(e) => deleteTemplate(e, t._id)}
+                                                >
+                                                    <Trash2 size={12} />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Template Hover Preview */}
+                        {hoveredTemplate && (
+                            <div>
+                                <div>Snapshot: {hoveredTemplate.name}</div>
+                                <div>
+                                    {[...hoveredTemplate.fields].sort((a, b) => a.y - b.y || a.x - b.x).map((f) => (
+                                        <div key={f.key} />
+                                    ))}
+                                </div>
+                                <div>Click to apply this layout</div>
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
+        </div>
+    )
+}
+
+// ─── Live Preview Component ───────────────────────────────────────────────────
+function PreviewForm({ fields }) {
+    let customFields = [...fields]
+
+    // Auto-layout for fields lacking coordinates
+    if (customFields.some(f => f.x === undefined || f.y === undefined)) {
+        let rowX = 0, rowY = 0
+        customFields = customFields.map(f => {
+            const w = f.w || (f.field_type === 'section' ? 12 : 6)
+            const h = f.h || 1
+            if (rowX + w > 12) { rowX = 0; rowY += 1 }
+            const out = { ...f, x: rowX, y: rowY, w, h }
+            rowX += w
+            return out
+        })
+    }
+
+    const sorted = [...customFields].sort((a, b) => a.y - b.y || a.x - b.x)
+
+    return (
+        <div>
+            <div>
+                <Eye size={14} />
+                <span>This is a read-only preview of how the form will look to users</span>
+            </div>
+            <div>
+                <div>
+                    {sorted.map((f) => {
+                        const isSection = f.field_type === 'section'
+                        return (
+                            <div key={f.key}>
+                                {isSection ? (
+                                    <h4>
+                                        {f.label}
+                                    </h4>
+                                ) : (
+                                    <>
+                                        <label>
+                                            {f.label}{f.required && <span>*</span>}
+                                        </label>
+                                        {f.field_type === 'textarea' ? (
+                                            <textarea placeholder={f.placeholder} disabled />
+                                        ) : f.field_type === 'select' ? (
+                                            <div>
+                                                <span>{f.placeholder || `Select ${f.label}`}</span>
+                                                <ChevronDown size={14} />
+                                            </div>
+                                        ) : (
+                                            <input type={f.field_type} placeholder={f.placeholder} disabled />
+                                        )}
+                                        {f.help_text && <p>{f.help_text}</p>}
+                                    </>
+                                )}
+                            </div>
+                        )
+                    })}
+                </div>
+            </div>
+        </div>
+    )
+}

@@ -1,0 +1,144 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "Fira Code", monospace;
+
+  /* Semantic Theme Tokens mapping to CSS Variables */
+  --color-bg-main: var(--bg-main);
+  --color-bg-card: var(--bg-card);
+  --color-bg-card-elevated: var(--bg-card-elevated);
+  --color-border-main: var(--border-main);
+  
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-glow: var(--primary-glow);
+  
+  --color-secondary: var(--secondary);
+  --color-secondary-glow: var(--secondary-glow);
+  
+  --color-text-main: var(--text-main);
+  --color-text-dim: var(--text-dim);
+  --color-text-muted: var(--text-muted);
+  
+  --color-neutral-subtle: var(--neutral-subtle);
+  --color-neutral-border: var(--neutral-border);
+
+  --color-accent-green: #00D97E;
+  --color-accent-blue: #3B82F6;
+  --color-accent-red: #FF4D4D;
+  --color-accent-amber: #F59E0B;
+  --color-accent-teal: #14B8A6;
+  --color-accent-orange: #F97316;
+  --color-accent-rose: #F43F5E;
+  --color-accent-cyan: #06B6D4;
+  --color-accent-magenta: #D946EF;
+  --color-accent-slate: #64748B;
+
+  --shadow-primary: 0 0 20px -5px var(--primary-glow);
+  --shadow-secondary: 0 0 20px -5px var(--secondary-glow);
+}
+
+:root {
+  /* Default Primary: Bronze/Orange */
+  --primary: #FF6A00;
+  --primary-hover: #E65F00;
+  --primary-glow: rgba(255, 106, 0, 0.4);
+  
+  --secondary: #7C5CFF;
+  --secondary-glow: rgba(124, 92, 255, 0.3);
+
+  /* Light Mode Defaults */
+  --bg-main: #F1F5F9; /* Make background slightly darker than pure white */
+  --bg-card: #FFFFFF;
+  --bg-card-elevated: #F8FAFC;
+  --border-main: #CBD5E1; /* Increase border visibility */
+  
+  --text-main: #0F172A;
+  --text-dim: #334155; /* Darker dim text */
+  --text-muted: #475569; /* Darker muted text */
+
+  --neutral-subtle: rgba(0, 0, 0, 0.05);
+  --neutral-border: rgba(0, 0, 0, 0.15); /* More visible subtle borders */
+}
+
+[data-theme='dark'] {
+  /* Dark Mode Overrides (Slate #2B2B2B base) */
+  --bg-main: #252525;
+  --bg-card: #2B2B2B;
+  --bg-card-elevated: #363636;
+  --border-main: #4A4A4A;
+  
+  --text-main: #F8FAFC;
+  --text-dim: #CBD5E1;
+  --text-muted: #9CA3AF;
+
+  --neutral-subtle: rgba(255, 255, 255, 0.08);
+  --neutral-border: rgba(255, 255, 255, 0.15);
+}
+
+@layer base {
+  * {
+    @apply border-border-main;
+  }
+
+  body {
+    @apply bg-bg-main text-text-main font-sans min-h-screen antialiased selection:bg-primary/30 transition-colors duration-300;
+    background-image: radial-gradient(circle at 50% 1px, var(--border-main) 1px, transparent 0);
+    background-size: 40px 40px;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold tracking-tight text-text-main;
+  }
+
+  input, select, textarea, button {
+    @apply focus:outline-none transition-all duration-300;
+  }
+
+  ::-webkit-scrollbar {
+    @apply w-2 h-2;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-bg-main;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-border-main rounded-full border-2 border-bg-main hover:opacity-80;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-bg-card/60 backdrop-blur-md border border-neutral-subtle shadow-2xl;
+  }
+  
+  .glass-elevated {
+    @apply bg-bg-card-elevated/80 backdrop-blur-xl border border-neutral-border shadow-[0_0_40px_-15px_rgba(0,0,0,0.5)];
+  }
+
+  .glow-orange {
+    @apply shadow-primary border-primary/30;
+  }
+
+  .glow-purple {
+    @apply shadow-secondary border-secondary/30;
+  }
+
+  .glow-green {
+    @apply shadow-[0_0_20px_-5px_rgba(0,217,126,0.3)] border-accent-green/30;
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-br from-text-main to-text-dim;
+  }
+
+  .animate-slow-spin {
+    animation: spin 8s linear infinite;
+  }
+  
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+}
+

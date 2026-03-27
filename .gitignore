@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+dist/
+build/
+.DS_Store
+
+# Environment & Secrets
+.env
+.env.*
+!.env.example
+ssl/*.key
+ssl/*.crt
+tailscale/
+cloudflare/
+cloudflared/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs/
+*.log
+
+# Docker
+docker-compose.override.yml

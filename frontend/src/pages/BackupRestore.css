@@ -1,0 +1,106 @@
+/* Page Scanline Effect */
+.backup-restore-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(var(--bg-main) 50%, var(--bg-neutral-subtle) 50%);
+  background-size: 100% 2px;
+  pointer-events: none;
+  z-index: 5;
+  opacity: 0.1;
+}
+
+.tech-card {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.tech-card:hover {
+  transform: translateY(-5px);
+}
+
+.card-glow-orange {
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.2), 0 0 20px var(--primary-glow);
+  border: 1px solid var(--primary-border);
+}
+
+.card-glow-purple {
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.2), 0 0 20px var(--secondary-glow);
+  border: 1px solid var(--secondary-border);
+}
+
+.icon-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1rem;
+  background: var(--bg-main-subtle);
+  border: 1px solid var(--border-main);
+  transition: all 0.3s ease;
+}
+
+.icon-box-orange { color: var(--primary); box-shadow: 0 0 15px var(--primary-glow); }
+.icon-box-purple { color: var(--secondary); box-shadow: 0 0 15px var(--secondary-glow); }
+
+.item-row {
+  background: var(--bg-main-subtle);
+  border: 1px solid var(--border-main);
+  transition: all 0.3s ease;
+}
+
+.item-row:hover {
+  background: var(--neutral-subtle);
+  border-color: var(--primary-border);
+  transform: translateX(5px);
+}
+
+.drop-zone {
+  border: 2px dashed var(--border-main);
+  background: var(--bg-main-subtle);
+  transition: all 0.3s ease;
+}
+
+.drop-zone.active {
+  border-color: var(--secondary);
+  background: var(--secondary-subtle);
+  box-shadow: 0 0 20px var(--secondary-glow);
+}
+
+.warning-box {
+  background: var(--accent-red-subtle);
+  border: 1px solid var(--accent-red-border);
+  border-radius: 0.75rem;
+  padding: 1rem;
+}
+
+.btn-premium {
+  position: relative;
+  overflow: hidden;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  transition: all 0.3s ease;
+}
+
+.btn-premium:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.btn-premium::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.btn-premium:hover::after {
+  opacity: 1;
+}
