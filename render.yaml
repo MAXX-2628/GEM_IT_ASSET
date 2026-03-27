@@ -3,7 +3,7 @@ services:
   - type: web
     name: it-asset-backend
     env: docker
-    dockerContext: .
+    dockerContext: backend
     dockerfilePath: backend/Dockerfile
     plan: free
     envVars:
@@ -20,7 +20,7 @@ services:
   - type: web
     name: it-asset-frontend
     env: docker
-    dockerContext: .
+    dockerContext: frontend
     dockerfilePath: frontend/Dockerfile
     plan: free
     envVars:
