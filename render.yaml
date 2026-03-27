@@ -3,8 +3,8 @@ services:
   - type: web
     name: it-asset-backend
     env: docker
-    dockerContext: backend
-    dockerfilePath: Dockerfile
+    dockerContext: .
+    dockerfilePath: backend/Dockerfile
     plan: free
     envVars:
       - key: NODE_ENV
@@ -20,8 +20,8 @@ services:
   - type: web
     name: it-asset-frontend
     env: docker
-    dockerContext: frontend
-    dockerfilePath: Dockerfile
+    dockerContext: .
+    dockerfilePath: frontend/Dockerfile
     plan: free
     envVars:
       - key: VITE_API_URL
