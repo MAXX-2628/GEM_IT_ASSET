@@ -135,6 +135,18 @@ export default function UserManagement() {
         }
     }
 
+    const handleDelete = async (u) => {
+        if (window.confirm(`⚠️ CAUTION: Are you sure you want to deactivate identity @${u.username}? This user will lose system access immediately.`)) {
+            try {
+                await api.delete(`/users/${u._id}`)
+                toast.success('Identity deactivated')
+                fetchData()
+            } catch (err) {
+                toast.error(err.response?.data?.message || 'Failed to deactivate identity')
+            }
+        }
+    }
+
     const getRoleData = (roleId) => ROLES.find(r => r.id === roleId) || ROLES[2]
 
     return (
@@ -257,6 +269,9 @@ export default function UserManagement() {
                                             </Button>
                                             <Button variant="ghost" size="icon" className="h-9 w-9 text-text-muted hover:text-primary" onClick={() => openEdit(u)}>
                                                 <Edit size={16} />
+                                            </Button>
+                                            <Button variant="ghost" size="icon" className="h-9 w-9 text-text-muted hover:text-accent-red" onClick={() => handleDelete(u)}>
+                                                <Trash2 size={16} />
                                             </Button>
                                         </div>
                                     </TD>

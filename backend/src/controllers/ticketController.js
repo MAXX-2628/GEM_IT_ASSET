@@ -1,5 +1,6 @@
-const { Branch } = require('../config/db');
 const logActivity = require('../utils/activityLogger');
+const notificationService = require('../services/notificationService');
+const db = require('../config/db');
 
 // @GET /api/tickets
 exports.getTickets = async (req, res, next) => {
@@ -79,6 +80,25 @@ exports.createTicket = async (req, res, next) => {
         });
 
         res.status(201).json({ success: true, data: ticket });
+
+        // Async: Notify Admins
+        (async () => {
+          try {
+            const admins = await db.User.find({ 
+              $or: [{ role: 'super_admin' }, { role: 'branch_admin', assignedBranches: ticket.branch_code }],
+              expoPushToken: { $exists: true }
+            });
+            const tokens = admins.map(u => u.expoPushToken).filter(t => t);
+            if (tokens.length > 0) {
+              await notificationService.sendPushNotification(
+                tokens,
+                `🚨 NEW TICKET: ${ticket.ticket_number}`,
+                `${ticket.title} | ${ticket.priority} | ${ticket.department}`,
+                { type: 'TICKET_NEW', id: ticket._id }
+              );
+            }
+          } catch (e) { console.error('Notify error', e); }
+        })();
     } catch (err) {
         next(err);
     }
@@ -106,6 +126,26 @@ exports.updateTicket = async (req, res, next) => {
         });
 
         res.status(200).json({ success: true, data: ticket });
+
+        // Async: Notify Raiser if Resolved
+        if (ticket.status === 'Resolved') {
+          (async () => {
+            try {
+              const raiser = await db.User.findOne({ 
+                $or: [{ username: ticket.raised_by }, { name: ticket.raised_by }],
+                expoPushToken: { $exists: true }
+              });
+              if (raiser?.expoPushToken) {
+                await notificationService.sendPushNotification(
+                  [raiser.expoPushToken],
+                  `✅ TICKET RESOLVED: ${ticket.ticket_number}`,
+                  `Your request "${ticket.title}" has been marked as RESOLVED.`,
+                  { type: 'TICKET_RESOLVED', id: ticket._id }
+                );
+              }
+            } catch (e) { console.error('Notify error', e); }
+          })();
+        }
     } catch (err) {
         next(err);
     }

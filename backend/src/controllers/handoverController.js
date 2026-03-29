@@ -1,4 +1,6 @@
 const logActivity = require('../utils/activityLogger');
+const notificationService = require('../services/notificationService');
+const db = require('../config/db');
 
 // @GET /api/handovers — List all handovers
 exports.getHandovers = async (req, res) => {
@@ -100,6 +102,24 @@ exports.createHandover = async (req, res) => {
     }
 
     res.status(201).json({ success: true, data: handover });
+
+    // Async: Notify Recipient
+    (async () => {
+      try {
+        const recipient = await db.User.findOne({ 
+          name: handoverData.recipient_name,
+          expoPushToken: { $exists: true }
+        });
+        if (recipient?.expoPushToken) {
+          await notificationService.sendPushNotification(
+            [recipient.expoPushToken],
+            `📦 ASSET ASSIGNED: ${handoverData.asset_id}`,
+            `Asset has been deployed to you by ${handoverData.handed_over_by}.`,
+            { type: 'HANDOVER_NEW', id: handover._id }
+          );
+        }
+      } catch (e) { console.error('Notify error', e); }
+    })();
 };
 // @POST /api/handovers/bulk — Create bulk handover records
 exports.createBulkHandover = async (req, res) => {
@@ -184,4 +204,22 @@ exports.createBulkHandover = async (req, res) => {
         message: `${results.length} assets handed over successfully.`,
         data: results
     });
+
+    // Async: Notify Recipient
+    (async () => {
+      try {
+        const recipient = await db.User.findOne({ 
+          name: recipient_name,
+          expoPushToken: { $exists: true }
+        });
+        if (recipient?.expoPushToken) {
+          await notificationService.sendPushNotification(
+            [recipient.expoPushToken],
+            `📦 BATCH DEPLOYMENT: ${results.length} Assets`,
+            `${results.length} assets have been deployed to you.`,
+            { type: 'HANDOVER_BULK', ids: results }
+          );
+        }
+      } catch (e) { console.error('Notify error', e); }
+    })();
 };

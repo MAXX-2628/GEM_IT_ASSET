@@ -118,3 +118,23 @@ exports.resetPassword = async (req, res) => {
         res.status(500).json({ success: false, message: 'Failed to reset password' });
     }
 };
+
+// @PUT /api/users/push-token
+exports.updatePushToken = async (req, res) => {
+    try {
+        const { pushToken } = req.body;
+        if (!pushToken) {
+            return res.status(400).json({ success: false, message: 'Push token is required' });
+        }
+
+        const user = await db.User.findByIdAndUpdate(req.user._id, { expoPushToken: pushToken }, { new: true });
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        res.status(200).json({ success: true, message: 'Push token synchronized' });
+    } catch (err) {
+        logger.error(`❌ Push Token Sync Error: ${err.message}`);
+        res.status(500).json({ success: false, message: 'Failed to sync push token' });
+    }
+};

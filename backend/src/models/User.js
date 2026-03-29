@@ -38,6 +38,7 @@ const UserSchema = new mongoose.Schema(
         allowedPages: [{ type: String }], // Array of page IDs e.g., ['dashboard', 'tickets']
         hasFullAccess: { type: Boolean, default: false }, // Access all branches
         lastLogin: { type: Date },
+        expoPushToken: { type: String }, // For push notifications
     },
     { timestamps: true }
 );
